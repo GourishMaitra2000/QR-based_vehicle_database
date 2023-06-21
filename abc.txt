@@ -1,0 +1,691 @@
+<?php
+
+	// this will avoid mysql_connect() deprecation error.
+	error_reporting( ~E_DEPRECATED & ~E_NOTICE );
+	// but I strongly suggest you to use PDO or MySQLi.
+	
+	define('DBHOST', 'localhost');
+	define('DBUSER', 'root');
+	define('DBPASS', '');
+	define('DBNAME', 'vehicle_reg');
+	
+	$conn = mysql_connect(DBHOST,DBUSER,DBPASS);
+	$dbcon = mysql_select_db(DBNAME);
+	
+	if ( !$conn ) {
+		die("Connection failed : " . mysql_error());
+	}
+	
+	if ( !$dbcon ) {
+		die("Database Connection failed : " . mysql_error());
+	}
+<?php if(isset($_POST['generate_text']) & !empty($_POST['generate_text']))
+{ include('./qrlib/qrlib.php'); 
+$text=$_POST['qr_name']; 
+$email=$_POST['qr_email']; 
+$reg=$_POST['qr_regnumber']; 
+$folder="images/"; 
+$file_name=$text. $email, $reg, $file_name ".png"; 
+$file_name=$folder.$file_name; 
+QRcode::png($text, $email, $reg, $file_name); 
+//To Display Code Without Storing 
+QRcode::png($text); }
+
+
+?>
+<?php if(isset($_POST['generate_text']) & !empty($_POST['generate_text']))
+{ include('./qrlib/qrlib.php'); 
+$text=$_POST['qr_text']; 
+$folder="images/"; 
+$file_name=$text. ".png"; 
+$file_name=$folder.$file_name; 
+QRcode::png($text,$file_name); 
+//To Display Code Without Storing 
+QRcode::png($text); }
+
+
+?>
+<?php
+    ob_start();
+    session_start();
+    require_once 'dbconnect.php';
+    
+    // if session is not set this will redirect to login page
+    if( !isset($_SESSION['user']) ) {
+        header("Location: index.php");
+        exit;
+    }
+    // select loggedin users detail
+    $res=mysql_query("SELECT * FROM staff WHERE userId=".$_SESSION['user']);
+    $userRow=mysql_fetch_array($res);
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Welcome Home - <?php echo $userRow['userEmail']; ?></title>
+<link rel="stylesheet" href="assets/css/bootstrap.min.css" type="text/css"  />
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+<body>
+
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="http://www.codingcage.com">NIVEVIS</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="home.php">Home</a></li>
+            <li><a href="vehicleReg.php">Register Vehicle</a></li>
+            <li class="active"><a href="generateqrcode.php">Generate QR code</a></li>
+            <li><a href="verifyCode.php">Verify QR Code</a></li>
+            <li><a href="identification.php">Identification</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+              <span class="glyphicon glyphicon-user"></span>&nbsp;Hi' <?php echo $userRow['userEmail']; ?>&nbsp;<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="logout.php?logout"><span class="glyphicon glyphicon-log-out"></span>&nbsp;Sign Out</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav> 
+
+    <div class="container" style="background-image: url(./images/NIVEVIS.png); background-size: cover; background-position: center; background-repeat: no-repeat; height: 650px; margin-top: 50px;">
+
+      <div class="page-header">
+      <h3 align="center">YOU CAN GENERATE THE QR CODE FOR YOUR VERIFICATION NUMBER HERE</h3>
+      </div>
+        
+        <div class="row">
+        <div class="col-lg-12">
+        <h3 align="center">ENTER YOUR VERIFICATION NUMBER TO GENERATE YOUR QR CODE</h3><br/><br/>
+
+      <form action="generate_code.php" method="post" target="print_popup" onsubmit="window.open('about:blank','print_popup','width=800,height=800');" style="text-align:center;">
+
+        <input style="border-radius:5px; height: 40px; width: 400px; font-size:20px;" type="text" name="qr_text"><br/><br/>
+        <input style="background-color: #337ab7; border-radius:5px; padding: 15px 30px 15px 30px; color: #fff; font-size:20px;" type="submit" value="Generate QR Code" name="generate_text">
+            
+      </form>
+
+    </div>
+
+     <script src="assets/jquery-1.11.3-jquery.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+</body>
+</html>
+<?php ob_end_flush(); ?>
+<?php
+	ob_start();
+	session_start();
+	require_once 'dbconnect.php';
+	
+	// if session is not set this will redirect to login page
+	if( !isset($_SESSION['user']) ) {
+		header("Location: index.php");
+		exit;
+	}
+	// select loggedin users detail
+	$res=mysql_query("SELECT * FROM staff WHERE userId=".$_SESSION['user']);
+	$userRow=mysql_fetch_array($res);
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Welcome Home - <?php echo $userRow['userEmail']; ?></title>
+<link rel="stylesheet" href="assets/css/bootstrap.min.css" type="text/css"  />
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+<body>
+
+	<nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="http://www.codingcage.com">NIVEVIS</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="home.php">Home</a></li>
+            <li><a href="vehicleReg.php">Register Vehicle</a></li>
+            <li><a href="generateqrcode.php">Generate QR code</a></li>
+            <li><a href="verifyCode.php">Verify QR Code</a></li>
+            <li><a href="identification.php">Identification</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+			  <span class="glyphicon glyphicon-user"></span>&nbsp;Hi' <?php echo $userRow['userEmail']; ?>&nbsp;<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="logout.php?logout"><span class="glyphicon glyphicon-log-out"></span>&nbsp;Sign Out</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav> 
+
+	<div id="wrapper">
+
+<div class="container" style="background-image: url(./images/NIVEVIS.png); background-size: cover; background-position: center; background-repeat: no-repeat; height: 650px;"><br/><br/>
+    
+    	<div class="page-header">
+    	<h1 align="center">WELCOME TO THE NIGERIA VEHICLE VERIFICATION PORTAL</h1>
+    	</div>
+        
+        <div class="row">
+        <div class="col-lg-12"><br/><br/>
+        <h3 align="center">CLICK HERE TO REGISTER VEHICLE <br/><br/>
+
+        <a href="vehicleReg.php"> <button style="background-color: #337ab7; text-align: center; border-radius:5px; padding: 15px 30px 15px 30px; color: #fff; font-size:20px;" value="CLICK HERE" name="generate_vn">CLICK HERE</button> </a>
+    	</h3>
+
+
+        </div>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <script src="assets/jquery-1.11.3-jquery.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    
+</body>
+</html>
+<?php ob_end_flush(); ?>
+<?php
+    ob_start();
+    session_start();
+    require_once 'dbconnect.php';
+    
+    // if session is not set this will redirect to login page
+    if( !isset($_SESSION['user']) ) {
+        header("Location: index.php");
+        exit;
+    }
+    // select loggedin users detail
+    $res=mysql_query("SELECT * FROM staff WHERE userId=".$_SESSION['user']);
+    $userRow=mysql_fetch_array($res);
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Welcome Home - <?php echo $userRow['userEmail']; ?></title>
+<link rel="stylesheet" href="assets/css/bootstrap.min.css" type="text/css"  />
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+<body>
+
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="http://www.codingcage.com">NIVEVIS</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="home.php">Home</a></li>
+            <li><a href="vehicleReg.php">Register Vehicle</a></li>
+            <li><a href="generateqrcode.php">Generate QR code</a></li>
+            <li><a href="verifyCode.php">Verify QR Code</a></li>
+            <li class="active"><a href="identification.php">Identification</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+              <span class="glyphicon glyphicon-user"></span>&nbsp;Hi' <?php echo $userRow['userEmail']; ?>&nbsp;<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="logout.php?logout"><span class="glyphicon glyphicon-log-out"></span>&nbsp;Sign Out</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav> 
+
+
+<div class="container" style="background-image: url(./images/NIVEVIS.png); background-size: cover; background-position: center; background-repeat: no-repeat; height: 650px;"><br/><br/><br/><br/><br/><br/>
+
+<?php
+          // Make a MySQL Connection
+          mysql_connect("localhost", "root", "") or die(mysql_error());
+          mysql_select_db("vehicle_reg") or die(mysql_error());
+                
+                if(isset($_POST['View'])){
+
+                    $verificationNumber = $_POST['verificationNumber'];
+
+
+                // Get a specific result from the "example" table
+                 $result = mysql_query("SELECT * FROM users
+                WHERE verificationNumber='$verificationNumber'") or die(mysql_error());  
+
+
+                // get the first (and hopefully only) entry from the result
+                // $row = mysql_fetch_array( $result );
+                // Print out the contents of each row into a table 
+               
+            }
+            
+
+        ?>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <table><font style="font-size: 25px;">
+            <?php
+
+                if(isset($result) && !empty($result)){
+                // Print out the contents of each row into a table 
+
+                    echo "<strong>Vehicle Details</strong> <br><br>";
+                    echo "<table class='table table-stripped'>";
+                    // echo "<tr> <th>Name</th> <th>Email Address</th> <th>Contact Address</th> <th>Phone Number</th> <th>Occupation</th> <th>Drivers Licence</th> <th>Vehicle Name</th> <th>Vehicle Model</th> <th>Vehicle Registration Number</th> <th>Vehicle Engine Number</th> <th>Vehicle Plate Number</th> <th>Vehicle verification Number</th> </tr>";
+                    while($row = mysql_fetch_array( $result )) {
+                        echo "<tr><td>"; 
+                        echo "<strong>Name</strong>";
+                        echo "</td><td><strong>"; 
+                        echo $row['userName'];
+                        echo "</strong></td></tr>"; 
+                        echo "<tr><td>"; 
+                        echo "<strong>Email Number</strong>";
+                        echo "</td><td><strong>"; 
+                        echo $row['userEmail'];
+                        echo "</strong></td></tr>";
+                        echo "<tr><td>"; 
+                        echo "<strong>Contact Address</strong>";
+                        echo "</td><td><strong>";
+                        echo $row['contact_Address'];
+                        echo "</strong></td></tr>";
+                        echo "<tr><td>"; 
+                        echo "<strong>Phone Number</strong>";
+                        echo "</td><td><strong>";
+                        echo $row['userPhone'];
+                        echo "</strong></td></tr>";
+                        echo "<tr><td>"; 
+                        echo "<strong>Occupation</strong>";
+                        echo "</td><td><strong>";
+                        echo $row['occupation'];
+                        echo "</strong></td></tr>";
+                        echo "<tr><td>"; 
+                        echo "<strong>Drivers Licence Number</strong>";
+                        echo "</td><td><strong>";
+                        echo $row['dlicenceReg'];
+                        echo "</strong></td></tr>";
+                        echo "<tr><td>"; 
+                        echo "<strong>Vehicle Name</strong>";
+                        echo "</td><td><strong>";
+                        echo $row['vehicle_Name'];
+                        echo "</strong></td></tr>";
+                        echo "<tr><td>"; 
+                        echo "<strong>Vehicle Model</strong>";
+                        echo "</td><td><strong>";
+                        echo $row['vehicle_Model'];
+                        echo "</strong></td></tr>";
+                        echo "<tr><td>"; 
+                        echo "<strong>Vehicle Registration Number</strong>";
+                        echo "</td><td><strong>";
+                        echo $row['vehicle_regNumber'];
+                        echo "</strong></td></tr>";
+                        echo "<tr><td>"; 
+                        echo "<strong>Vehicle Engine Number</strong>";
+                        echo "</td><td><strong>";
+                        echo $row['vehicle_Engine'];
+                        echo "</strong></td></tr>";
+                        echo "<tr><td>"; 
+                        echo "<strong>Vehicle Plate Number</strong>";
+                        echo "</td><td><strong>";
+                        echo $row['vehiclePlate'];
+                        echo "</strong></td></tr>";
+                        echo "<tr><td>"; 
+                        echo "<strong>verification Number</strong>";
+                        echo "</td><td><strong>";
+                        echo $row['verificationNumber'];
+                        echo "</strong></td></tr>";
+
+                    }
+                }
+                
+            ?>
+
+            </font></table>
+        </div>
+    </div>
+        
+</div>
+
+    <script src="assets/jquery-1.11.3-jquery.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+</body>
+</html>
+<?php
+	ob_start();
+	session_start();
+	require_once 'dbconnect.php';
+	
+	// it will never let you open index(login) page if session is set
+	if ( isset($_SESSION['user'])!="" ) {
+		header("Location: home.php");
+		exit;
+	}
+	
+	$error = false;
+	
+	if( isset($_POST['btn-login']) ) {	
+		
+		// prevent sql injections/ clear user invalid inputs
+		$phone = trim($_POST['phone']);
+		$phone = strip_tags($phone);
+		$phone = htmlspecialchars($phone);
+		
+		$pass = trim($_POST['pass']);
+		$pass = strip_tags($pass);
+		$pass = htmlspecialchars($pass);
+		// prevent sql injections / clear user invalid inputs
+		
+		
+		if(empty($pass)){
+			$error = true;
+			$passError = "Please enter your password.";
+		}
+		
+		// if there's no error, continue to login
+		if (!$error) {
+			
+			$password = hash('sha256', $pass); // password hashing using SHA256
+		
+			$res=mysql_query("SELECT userId, userName, userPass FROM staff WHERE userPhone='$phone'");
+			$row=mysql_fetch_array($res);
+			$count = mysql_num_rows($res); // if uname/pass correct it returns must be 1 row
+			
+			if( $count == 1 && $row['userPass']==$password ) {
+				$_SESSION['user'] = $row['userId'];
+				header("Location: home.php");
+			} else {
+				$errMSG = "Incorrect Credentials, Try again...";
+			}
+				
+		}
+		
+	}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Welcome to The Login Page</title>
+<link rel="stylesheet" href="assets/css/bootstrap.min.css" type="text/css"  />
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="home.php">NIVEVIS</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="register.php">Register</a></li>
+            <li class="active"><a href="index.php">Login</a></li>
+          </ul>
+          
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav> 
+<br/><br/>
+<div class="container" style="background-image: url(./images/NIVEVIS.png); background-size: cover; background-position: center; background-repeat: no-repeat; height: 650px;"><br/><br/>
+
+	<div id="login-form">
+    <form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" autocomplete="off">
+    
+    	<div class="col-md-12">
+        
+        	<div class="form-group">
+            	<h2 class="">Sign In.</h2>
+            </div>
+        
+        	<div class="form-group">
+            	<hr />
+            </div>
+            
+            <?php
+			if ( isset($errMSG) ) {
+				
+				?>
+				<div class="form-group">
+            	<div class="alert alert-danger">
+				<span class="glyphicon glyphicon-info-sign"></span> <?php echo $errMSG; ?>
+                </div>
+            	</div>
+                <?php
+			}
+			?>
+            
+            <div class="form-group">
+            	<div class="input-group">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-phone"></span></span>
+            	<input type="text" name="phone" class="form-control" placeholder="Your Phone Number (starting with 234)" value="<?php echo $phone; ?>" maxlength="40" />
+                </div>
+                <span class="text-danger"><?php echo $phoneError; ?></span>
+            </div>
+            
+            <div class="form-group">
+            	<div class="input-group">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+            	<input type="password" name="pass" class="form-control" placeholder="Your Password" maxlength="15" />
+                </div>
+                <span class="text-danger"><?php echo $passError; ?></span>
+            </div>
+            
+            <div class="form-group">
+            	<hr />
+            </div>
+            
+            <div class="form-group">
+            	<button type="submit" class="btn btn-block btn-primary" name="btn-login">Sign In</button>
+            </div>
+            
+            <div class="form-group">
+            	<hr />
+            </div>
+            
+            <div class="form-group">
+            	<a href="register.php">Sign Up Here...</a>
+            </div>
+        
+        </div>
+   
+    </form>
+    </div>	
+
+</div>
+
+</body>
+</html>
+<?php ob_end_flush(); ?>
+<?php
+
+	session_start();
+	
+	if (!isset($_SESSION['user'])) {
+		header("Location: index.php");
+	} else if(isset($_SESSION['user'])!="") {
+		header("Location: home.php");
+	}
+	
+	if (isset($_GET['logout'])) {
+		unset($_SESSION['user']);
+		session_unset();
+		session_destroy();
+		header("Location: index.php");
+		exit;
+	}
+<?php
+	ob_start();
+	session_start();
+	require_once 'dbconnect.php';
+	
+	// if session is not set this will redirect to login page
+	if( !isset($_SESSION['user']) ) {
+		header("Location: index.php");
+		exit;
+	}
+	// select loggedin users detail
+	$res=mysql_query("SELECT * FROM staff WHERE userId=".$_SESSION['user']);
+	$userRow=mysql_fetch_array($res);
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Welcome Home - <?php echo $userRow['userEmail']; ?></title>
+<link rel="stylesheet" href="assets/css/bootstrap.min.css" type="text/css"  />
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+<body>
+
+	<nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="http://www.codingcage.com">NIVEVIS</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="home.php">Home</a></li>
+            <li><a href="vehicleReg.php">Register Vehicle</a></li>
+            <li><a href="generateqrcode.php">Generate QR code</a></li>
+            <li><a href="verifyCode.php">Verify QR Code</a></li>
+            <li><a href="identification.php">Identification</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+			  <span class="glyphicon glyphicon-user"></span>&nbsp;Hi' <?php echo $userRow['userEmail']; ?>&nbsp;<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="logout.php?logout"><span class="glyphicon glyphicon-log-out"></span>&nbsp;Sign Out</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav> 
+
+	<div id="wrapper">
+
+<div class="container" style="background-image: url(./images/NIVEVIS.png); background-size: cover; background-position: center; background-repeat: no-repeat; height: 650px;"><br/><br/>
+    
+    	<div class="page-header">
+    	<h1 align="center">WELCOME TO THE NIGERIA VEHICLE VERIFICATION PORTAL</h1>
+    	</div>
+        
+        <div class="row">
+        <div class="col-lg-12"><br/><br/>
+        <h3 align="center">CLICK HERE TO REGISTER VEHICLE </h3><br/><br/>
+
+
+        <?php
+          // Make a MySQL Connection
+          mysql_connect("localhost", "root", "") or die(mysql_error());
+          mysql_select_db("vehicle_reg") or die(mysql_error());
+
+                
+                if(isset($_POST['generate_vn'])){
+
+                $verificationNumber = $userRow['vehicle_regNumber'] . $userRow['vehiclePlate'];
+                
+                // Get Sandy's record from the "example" table
+
+                $result = mysql_query("UPDATE users SET verificationNumber='$verificationNumber' WHERE userId=".$_SESSION['user']) 
+                or die(mysql_error());
+                
+                }
+        
+        ?>
+
+        <form action="" method="post" style="text-align:center;">
+
+
+        <input style="background-color: #337ab7; border-radius:5px; padding: 15px 30px 15px 30px; color: #fff; font-size:20px;" type="submit" value="CLICK HERE" name="generate_vn">
+            
+        </form>
+
+
+        <h1 align="center" style="color: #000;"><strong>
+        <?php
+
+        if(isset($verificationNumber) && !empty($verificationNumber)){
+
+        echo "HERE IS YOUR VEHICLE VERIFICATION NUMBER", "<br>";
+        echo "$verificationNumber";
+
+        }
+
+        ?>
+        </strong></h1>
+
+        <!-- <a align="center" style="padding: 20px 40px 20px 40px; font-size: 20px; border-radius: 5px; color: #fff; background-color: #337ab7; align-content: center; text-align: center; margin-left: 40%; margin-right: 40%;" href="">CLICK HERE</a> -->
+        </div>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <script src="assets/jquery-1.11.3-jquery.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    
+</body>
+</html>
+<?php ob_end_flush(); ?>
+<html> 
+<body> 
+<div id="wrapper"> 
+<form method="post" action="generate_code.php"> 
+<input type="text" name="qr_text">
+<input type="submit" name="generate_text" value="Generate"> 
+</form> 
+</div> 
+</body> 
+</html>
